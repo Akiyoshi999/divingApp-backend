@@ -7,6 +7,23 @@ jobs:
 
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+      - run:
+          name: copy .env
+          command: cp .env.example .env
+      - run:
+          name: alias sail
+          command: alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+
       - run:
           name: composer install
           command: docker run --rm -u "$(id -u):$(id -g)" -v $(pwd):/var/www/html -w /var/www/html laravelsail/php81-composer:latest composer install --ignore-platform-reqs
+
+      - run:
+          name: sail up -d
+          command: sail up -d
+      - run:
+          name: sail test
+          command: sail test
